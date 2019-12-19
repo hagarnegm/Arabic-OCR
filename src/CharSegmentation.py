@@ -1,3 +1,5 @@
+
+
 from allimports import *
 
 
@@ -33,27 +35,27 @@ def getLineOfMaxTransitions(line, baseline):
 
 
 def checkCutPoint(word, MFV, start, end):
-    print("MFV: ", MFV)
+    # print("MFV: ", MFV)
     mid = round((start + end + 1) / 2)
     for i in range(start, end - 1, -1):
         if sum(word[:, i]) == 0:
-            print("empty space")
+            # print("empty space")
             return i
 
     if sum(word[:, mid]) == MFV:
-        print("just in the middle")
+        # print("just in the middle")
         return mid
     else:
         for i in range(end, mid - 1, -1):
             if sum(word[:, mid]) == MFV:
-                print("near the end")
+                # print("near the end")
                 return i
 
         for i in range(mid, start + 1):
             if sum(word[:, mid]) == MFV:
-                print("near the start")
+                # print("near the start")
                 return i
-    print("bad luck :(")
+    # print("bad luck :(")
     return mid
 
 def getHPBnHBA(word,baseline):
@@ -84,7 +86,7 @@ def getPotentialSeparationPoints(line, word, maxTransIndex):
     for i in range(word.shape[1] - 1, -1, -1):
         if state == 0 and word[maxTransIndex][i] > 0:
             end = i
-            print(start, ",", end)
+            # print(start, ",", end)
             cut = checkCutPoint(word, mostFrValue, start, end)
             allCuts.append(cut)
             startend.append([start, end])
@@ -393,20 +395,20 @@ def cutsFiltration(word, cuts, baseline, MTI, MFV, startend):
 
         if sum(word[:, cuts[i]]) == 0 and i > 0 :  # 2 separated letters
             valid.append(cuts[i])
-            print("valid, VP=0: ", i)
+            # print("valid, VP=0: ", i)
 
         elif i > 0 and checkAllHoles(word[:, endcut:cuts[i-1]+1], abs(cuts[i]-endcut)):  # it has a hole
-            print("invalid, hole: ", i)
+            # print("invalid, hole: ", i)
             del cuts[i]
             continue
 
         elif checkPath(word[:, endcut:cuts[i] ], cuts[i], baseline):
             valid.append(cuts[i])
-            print("valid, no path: ", i)
+            # print("valid, no path: ", i)
 
         elif sum(word[baseline:baseline+1,cuts[i]] )== 0 and i > 0:  # no baseline between start and end of the region
             if HPB >= HPA:
-                 print("invalid,no baseline, HPB > HPA: ", i)
+                 # print("invalid,no baseline, HPB > HPA: ", i)
                  i+=1
                  continue
         #
@@ -422,13 +424,13 @@ def cutsFiltration(word, cuts, baseline, MTI, MFV, startend):
                 i < len(cuts) - 1 and sum(word[:, cuts[i + 1]]) == 0
                 and height < (1 / 2) * abs(baseline - abs(height - down))):
             # last region and height < half baseline to top pixel
-            print("invalid, last region or height < baseline to top", i)
+            # print("invalid, last region or height < baseline to top", i)
             i += 1
             continue
 
         elif not stroke1:
             valid.append(cuts[i])
-            print("not stroke", i)
+            # print("not stroke", i)
             # if i < len(cuts)-1:
             #     x=sum(word[baseline, startend[i + 1][1] + 1:startend[i + 1][0] + 1])
             #     y=sum(word[:, cuts[i + 1]])
@@ -443,30 +445,30 @@ def cutsFiltration(word, cuts, baseline, MTI, MFV, startend):
         elif stroke1:
             if dots1:  # dots
                 valid.append(cuts[i])
-                print("stroke with dots", i)
+                # print("stroke with dots", i)
 
             if not dots1:     # no dots
                 if stroke2:     # next is stroke
                     if not dots2:    # no dots
                         if sum(word[:, endcut2]) > 0:
                             valid.append(cuts[i+2])
-                            print("stroke without dots and the next is stroke without dots", i)
+                            # print("stroke without dots and the next is stroke without dots", i)
                             i += 3
                         else:
                             i += 2
-                            print("stroke without dots and the next is stroke without dots", i)
+                            # print("stroke without dots and the next is stroke without dots", i)
 
                     elif dots2:    # next is stroke with dots
                         if stroke3 and not dots3:   # next next is stroke without dots
                             valid.append(cuts[i])
-                            print("stroke without dots,next is stroke with dots and nn is stroke without dots", i)
+                            # print("stroke without dots,next is stroke with dots and nn is stroke without dots", i)
                             i += 3
                             continue
                 else:  # next is not stroke
                     valid[len(valid)-1] = cuts[i]
-                    print("stroke without dots next is not stroke")
+                    # print("stroke without dots next is not stroke")
         else:
-            print("passed all conditions", i)
+            # print("passed all conditions", i)
             valid.append(cuts[i])
         i += 1
     return valid
