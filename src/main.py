@@ -7,16 +7,16 @@ image = io.imread('..\scanned\capr37.png')
 image = preprocessing(image)
 images = lineSegmentation(image)
 dist = getWordDist(images[0])
-line = wordSegmentation(images[3], dist)
+line = wordSegmentation(images[4], dist)
 
 print(dist)
 print(len(line))
-base = getBasline(images[3])
-trans = getLineOfMaxTransitions(images[3], base)
+base = getBasline(images[4])
+trans = getLineOfMaxTransitions(images[4], base)
 print(trans)
 #len(line)
-for i in range(7,8,1):
-    cuts, startend, MFV = getPotentialSeparationPoints(images[3], line[i], trans)
+for i in range(0,len(line),1):
+    cuts, startend, MFV = getPotentialSeparationPoints(images[4], line[i], trans)
     cuts = cutsFiltration(line[i], cuts, base, trans, MFV, startend)
 
     # i=1
