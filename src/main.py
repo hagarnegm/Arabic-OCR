@@ -3,41 +3,65 @@ from preprocessing import *
 from LineSegmentation import *
 from WordSegmentation import *
 
-image = io.imread('..\scanned\capr37.png')
+
+image = io.imread('..\scanned\capr6.png')
+print("start")
 image = preprocessing(image)
-images = lineSegmentation(image)
-dist = getWordDist(images[0])
-line = wordSegmentation(images[4], dist)
+line,lindices = lineSegmentation(image)
+for i in range(len(lindices)):
+     cv2.line(image, (0,lindices[i][0]), (image.shape[1]-1,lindices[i][0]), (255, 0, 0), 1)
+     cv2.line(image, (0, lindices[i][1]), (image.shape[1] - 1, lindices[i][1]), (255, 0, 0), 1)
+dist = getWordDist(line[0])
 
-print(dist)
-print(len(line))
-base = getBasline(images[4])
-trans = getLineOfMaxTransitions(images[4], base)
-print(trans)
-#len(line)
-for i in range(0,len(line),1):
-    cuts, startend, MFV = getPotentialSeparationPoints(images[4], line[i], trans)
-    cuts = cutsFiltration(line[i], cuts, base, trans, MFV, startend)
+for i in range(len(line)):
+    base = getBasline(line[i])
+    trans = getLineOfMaxTransitions(line[i], base)
+    words, windices = wordSegmentation(line[i], dist)
+    for j in range(len(words)):
+        cv2.line(image, (windices[j][0], lindices[i][0]), (windices[j][0], lindices[i][1]), (255, 0, 0), 1)
+        cv2.line(image, (windices[j][1], lindices[i][0]), (windices[j][1], lindices[i][1]), (255, 0, 0), 1)
+        cuts, startend, MFV = getPotentialSeparationPoints(line[i], words[j], trans)
+        cuts = cutsFiltration(words[j], cuts, base, trans, MFV, startend)
+        for k in range(len(cuts)):
+            cv2.line(image, (windices[j][0]+cuts[k], lindices[i][0]), (windices[j][0]+cuts[k], lindices[i][1]), (255, 0, 0), 1)
+viewer = ImageViewer(image)
+viewer.show()
 
-    # i=1
-    # end=0
-    # while i < len(cuts):
-    #     print("loop no: ",i)
-    #     if (i==len(cuts)-1):
-    #         end=1
-    #     else:
-    #         end=cuts[i+1]
-    #     print("start: ",cuts[i-1],",end: ",end)
 
-    #     con,hindex=checkHolesV(line[15],cuts[i])
-    #     if con and checkHolesH(line[15],hindex,cuts[i-1],end):
-    #         del cuts[i]
-    #         del startend[i]
-    #         i-=1
-    #     i+=1
 
-    for j in range(len(cuts)):
-       cv2.line(line[i], (cuts[j], 0), (cuts[j], line[i].shape[0]), (255, 0, 0), 1)
-    viewer = ImageViewer(line[i])
-    viewer.show()
 
+
+
+
+
+##################################################
+
+
+
+
+
+
+
+
+
+#
+# image = io.imread('..\scanned\capr6.png')
+# image = preprocessing(image)
+# images,lindices = lineSegmentation(image)
+# dist = getWordDist(images[0])
+# line,windices = wordSegmentation(images[0], dist)
+#
+# print(dist)
+# print(len(line))
+# base = getBasline(images[0])
+# print("base: ",base)
+# trans = getLineOfMaxTransitions(images[0], base)
+# print(trans)
+# #len(line)
+# for i in range(11,12,1):
+#     cuts, startend, MFV = getPotentialSeparationPoints(images[0], line[i], trans)
+#     cuts = cutsFiltration(line[i], cuts, base, trans, MFV, startend)
+#     for j in range(len(cuts)):
+#        cv2.line(line[i], (cuts[j], 0), (cuts[j], line[i].shape[0]), (255, 0, 0), 1)
+#     viewer = ImageViewer(line[i])
+#     viewer.show()

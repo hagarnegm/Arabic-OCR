@@ -33,27 +33,27 @@ def getLineOfMaxTransitions(line, baseline):
 
 
 def checkCutPoint(word, MFV, start, end):
-    print("MFV: ", MFV)
+    #print("MFV: ", MFV)
     mid = round((start + end + 1) / 2)
     for i in range(start, end - 1, -1):
         if sum(word[:, i]) == 0:
-            print("empty space")
+            #print("empty space")
             return i
 
     if sum(word[:, mid]) == MFV:
-        print("just in the middle")
+        #print("just in the middle")
         return mid
     else:
         for i in range(end, mid - 1, -1):
             if sum(word[:, mid]) <= MFV:
-                print("near the end")
+                #print("near the end")
                 return i
 
         for i in range(mid, start + 1):
             if sum(word[:, mid]) <= MFV:
-                print("near the start")
+                #print("near the start")
                 return i
-    print("bad luck :(")
+    #print("bad luck :(")
     return mid
 
 def getHPBnHBA(word,baseline):
@@ -73,7 +73,14 @@ def getPotentialSeparationPoints(line, word, maxTransIndex):
     for i in range(tempLine.shape[1]):
         if sum(tempLine[:, i]) > 0:
             projections.append(sum(tempLine[:, i]))
-    mostFrValue = mode(projections)
+    #mostFrValue = mode(projections)
+    if len(projections)>0:
+        projections.sort()
+        mostFrValue = Counter(projections)
+        mostFrValue = mostFrValue.most_common(1)[0][0]
+    else:
+        mostFrValue=510
+
     start = 0
     end = 0
     cut = 0
@@ -84,7 +91,7 @@ def getPotentialSeparationPoints(line, word, maxTransIndex):
     for i in range(word.shape[1] - 1, -1, -1):
         if state == 0 and word[maxTransIndex][i] > 0:
             end = i
-            print(start, ",", end)
+            #print(start, ",", end)
             cut = checkCutPoint(word, mostFrValue, start, end)
             allCuts.append(cut)
             startend.append([start, end])
@@ -172,13 +179,13 @@ def checkAllDots(seg):
         con, hIndex = checkHolesV(seg, i)
         if con:
             start, end = getStartnEnd(seg, hIndex, i)
-            if sum(seg[hIndex, end:start+1]) == 0:
+            if sum(seg[hIndex, end:start+1]) == 0 :#or sum(seg[hIndex-1, end:start+1]) == 0:
                 return True,hIndex
             else:
                 con, hIndex2 = checkHolesV(seg[0:hIndex, :], i)
                 if con:
                     start, end = getStartnEnd(seg[0:hIndex, :], hIndex2, i)
-                    if sum(seg[hIndex2, end:start+1]) == 0:
+                    if sum(seg[hIndex2, end:start+1]) == 0 :#or sum(seg[hIndex2, end:start+1]):
                         return True, hIndex2
     return False,None
 
@@ -215,72 +222,6 @@ def getWidth(seg):
     width = abs(end - start)
     return width
 
-# def checkStroke(seg, baseline, MFV):
-#     HPs = []
-#     hole = False
-#     trash = False
-#     dots = False
-#     con1 = False
-#     con2 = False
-#     con3 = False
-#     hIndexd=0
-#     hIndext = 0
-#     for i in range(seg.shape[1]-1,-1,-1):
-#         con, hIndex = checkHolesV(seg, i)
-#         if con:
-#             trash = True
-#             hIndext = hIndex
-#             if con and sum(seg[hIndex,:]) == 0:
-#                 dots = True
-#                 hIndexd = hIndex
-#                 break
-#
-#     newSeg = seg.copy()
-#     if dots:
-#         if hIndexd >=baseline-2:
-#             newSeg[hIndexd:newSeg.shape[0], :] = 0
-#         else:
-#             newSeg[0:hIndexd, :] = 0
-#
-#     elif trash and not hole:
-#         if hIndext >=baseline-2:
-#             newSeg[hIndext:newSeg.shape[0], :] = 0
-#         else:
-#             newSeg[0:hIndext, :] = 0
-#
-#     for i in range(newSeg.shape[1]-1,-1,-1):
-#         con, hIndex = checkHolesV(newSeg, i)
-#         if con:
-#             if checkHolesH(seg, hIndex, seg.shape[1] - 1, 0):
-#                 hole = True
-#                 break
-#
-#     height, HPs, end = getHeight(newSeg)
-#     #height = height-abs(baseline-end)
-#     HPs = np.array(HPs)
-#     secondPeak = 0
-#     MF = 0
-#     if len(HPs[HPs > 0]) > 0:
-#         x = HPs[HPs > 0]
-#         x.sort()
-#         MF = Counter(x)
-#         MF = MF.most_common(1)[0][0]
-#     HPA = 0
-#     for i in range(baseline):
-#         HPA += sum(seg[i, :])
-#     HPB = 0
-#     for i in range(baseline - 1, seg.shape[0], 1):
-#         HPB += sum(seg[i, :])
-#     if HPA > HPB:
-#         con1 = True
-#     if height <= (3/4) * abs(baseline-seg.shape[0]):
-#         con2 = True
-#     if MF <= MFV:
-#         con3 = True
-#
-#     if con1 and con2 and con3 and not hole:
-#         return True, dots
-#     return False, dots
 
 
 
@@ -290,7 +231,7 @@ def checkDots(seg):
     for i in range(seg.shape[1] - 1, -1, -1):
         con, hIndex = checkHolesV(seg, i)
         if con:
-            if con and sum(seg[hIndex,:]) == 0:
+            if con and (sum(seg[hIndex,:]) == 0 ):#or sum(seg[hIndex-1,:]) == 0 ):
             #if not checkHolesH(seg,hIndex,seg.shape[1]-1,0):
                 dots = True
                 hIndexd = hIndex
@@ -311,6 +252,14 @@ def checkStroke(seg,baseline,MFV):
             newSeg[hIndexd:newSeg.shape[0], :] = 0
         else:
             newSeg[0:hIndexd, :] = 0
+    else:
+        dots2,hIndex2=checkAllDots(seg)
+        if dots2:
+            if hIndex2 >= baseline - 2:
+                newSeg[hIndex2:newSeg.shape[0], :] = 0
+            else:
+                newSeg[0:hIndex2, :] = 0
+
 
     # then check for holes
     for i in range(newSeg.shape[1] - 1, -1, -1):
@@ -319,7 +268,6 @@ def checkStroke(seg,baseline,MFV):
             holes=checkAllHoles(newSeg, i)
             if holes:
                 return False, dots
-
 
     # remove useless characters
     height, HPs, end = getHeight(newSeg)
@@ -335,7 +283,7 @@ def checkStroke(seg,baseline,MFV):
     HPA,HPB = getHPBnHBA(newSeg, baseline)
     if HPA < HPB:
         return False,dots
-    if height > (3/4) * abs(baseline-seg.shape[0]-1):
+    if height > (3/4) * abs(baseline-seg.shape[0]-1) or height <=2:
         return False,dots
     if MF > MFV+255:
        return False,dots
@@ -347,6 +295,8 @@ def connectedComponent(word, s1, s2):  # from current cut index to next one
     word[s1, s2] = 3
     stack1 = [s1]
     stack2 = [s2]
+    pixels=[]
+    pixels.append([s1,s2])
     while len(stack1) > 0:
         x = stack1[-1]
         y = stack2[-1]
@@ -357,6 +307,8 @@ def connectedComponent(word, s1, s2):  # from current cut index to next one
                 word[x + indices[j][0], y + indices[j][1]] = 3
                 stack1.append(x+indices[j][0])
                 stack2.append(y+indices[j][1])
+                pixels.append([x+indices[j][0],y+indices[j][1]])
+    return pixels
 
 
 def checkPath(word,cutIndex,baseline):
@@ -364,30 +316,52 @@ def checkPath(word,cutIndex,baseline):
     temp= word.copy()
     if dots:
         if hIndexd >= baseline-2:
-            temp[hIndexd:temp.shape[0], :] = 0
+            temp[hIndexd:temp.shape[0],:] = 0
         else:
             temp[0:hIndexd, :] = 0
 
     c = 0
+    components=[]
+    lenghts=[]
     for i in range(temp.shape[0]-1,-1,-1):
         for j in range(temp.shape[1]-1,-1,-1):
             if temp[i][j] > 3:
-                connectedComponent(temp, i, j)
+                x=connectedComponent(temp, i, j)
+                x = np.array(x)
+                components.append(x)
+
+                MF = Counter(x[:,0])
+                MF = MF.most_common(1)[0][1]
+                lenghts.append(MF)
+
                 c += 1
-    if c > 1:
-        return True
+                if c > 1:
+                    components=np.array(components)
+                    lenghts=np.array(lenghts)
+                    components=np.array(components[lenghts==min(lenghts)])
+                    word[components[0][:,0],components[0][:,1]]=0
+                    return True
     return False
 
+def wrongLastRegion(baseline,seg):
+    fisrtW=np.where(seg[baseline,:]==255)[0][0]
+    secondW=np.where(seg[baseline-2,:]==255)[0][0]
+    if abs(fisrtW-secondW) > 3:
+        return False
+    return True
 
-def cutsFiltration(word, cuts, baseline, MTI, MFV, startend):
+
+def cutsFiltration(words, cuts, baseline, MTI, MFV, startend):
     valid = []
-    i = 0
+    i = 1
+    word=words.copy()
     while i < len(cuts):
         start = startend[i][0]
         end = startend[i][1]
         HPA, HPB = getHPBnHBA(word[:, end + 1:start], baseline)
-        height, HPs, down = getHeight(word[:, end + 1: start + 1])
-        con, hIndex = checkHolesV(word, cuts[i])
+
+        #height, HPs, down = getHeight(word[:, end + 1: start + 1])
+        #con, hIndex = checkHolesV(word, cuts[i])
         # con1, hIndex1 = [False, None]
         # con2, hIndex2 = [False, None]
         if i == len(cuts) - 1:
@@ -405,6 +379,14 @@ def cutsFiltration(word, cuts, baseline, MTI, MFV, startend):
         else:
             endcut2 = cuts[i + 3]
 
+        height, HPs, down = getHeight(word[:, endcut:cuts[i]])
+        top = abs(height-down)
+        above = abs(baseline-top)
+        below = abs(above-height)+1
+
+        #height2, HPs2, down2 = getHeight(word[baseline:word.shape[0], endcut:cuts[i]])
+        #width=getWidth(word[:, endcut:cuts[i-1]])
+        #HPA2, HPB2 = getHPBnHBA(word[:, endcut:cuts[i]], baseline)
         stroke1, dots1 = checkStroke(word[:, cuts[i]:cuts[i-1]], baseline, MFV)
         stroke2, dots2 = checkStroke(word[:, endcut:cuts[i]], baseline, MFV)
         stroke3, dots3 = checkStroke(word[:, endcut1:endcut], baseline, MFV)
@@ -418,7 +400,7 @@ def cutsFiltration(word, cuts, baseline, MTI, MFV, startend):
             del cuts[i]
             continue
 
-        elif checkPath(word[:, endcut:cuts[i] ], cuts[i], baseline):
+        elif checkPath(word[:, endcut:cuts[i]+1], cuts[i], baseline):
             valid.append(cuts[i])
             print("valid, no path: ", i)
 
@@ -442,13 +424,14 @@ def cutsFiltration(word, cuts, baseline, MTI, MFV, startend):
         #         i+=1
         #         continue
 
-        # elif (i == len(cuts)-1 and sum(word[:, cuts[i]]) != 0) or (
-        #         i < len(cuts) - 1 and sum(word[:, cuts[i + 1]]) == 0
-        #         and height < (1 / 2) * abs(baseline - abs(height - down))):
-        #     # last region and height < half baseline to top pixel
-        #     print("invalid, last region or height < baseline to top", i)
-        #     i += 1
-        #     continue
+        elif (i == len(cuts)-1 and sum(word[:, cuts[i]]) != 0 and above > below and above < (7/8) * baseline and wrongLastRegion(baseline,word[:,endcut:cuts[i]])) :
+                # or (
+                # i < len(cuts) - 1 and sum(word[:, cuts[i + 1]]) == 0
+                # and height < (1 / 2) * abs(baseline - abs(height - down))):
+            # last region and height < half baseline to top pixel
+            print("invalid, last region or height < baseline to top", i)
+            i += 1
+            continue
 
         elif not stroke1:
             valid.append(cuts[i])

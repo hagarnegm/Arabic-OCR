@@ -36,6 +36,7 @@ def preprocessing(image):
     # thresh=cv2.dilate(thresh,kernel,iterations=1)
     # edges=canny(thresh,sigma=0.3)
     # thresh=thresh-edges
-    # morphed=cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-    # thresh=cv2.erode(thresh,kernel,iterations=1)
+    #thresh=cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+
+    #thresh=cv2.erode(thresh,kernel,iterations=1)
     return thresh

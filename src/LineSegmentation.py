@@ -3,6 +3,7 @@ from allimports import *
 
 def lineSegmentation(image):
     segments = []
+    indices=[]
     start = 0
     end = 0
     state = 0
@@ -14,4 +15,5 @@ def lineSegmentation(image):
             end = i
             state = 0
             segments.append(np.array(image[start:end, :]))
-    return segments
+            indices.append([start,end])
+    return segments,indices

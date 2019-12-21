@@ -21,6 +21,7 @@ def getWordDist(line):
 
 def wordSegmentation(line, maxdist):
     segments = []
+    indices=[]
     start = 0
     state = 0
     pos = 0
@@ -31,6 +32,7 @@ def wordSegmentation(line, maxdist):
             if abs(i - pos) >= maxdist - 3 and abs(i - pos) <= maxdist + 2:
                 state = 0
                 segments.append(np.array(line[:, pos:start + 2]))
+                indices.append([pos,start+2])
         if sum(line[:, i]) > 0 and state == 0:
             start = i
             state = 1
@@ -39,7 +41,8 @@ def wordSegmentation(line, maxdist):
             pos = i
             end = i
     segments.append(np.array(line[:, end:start + 2]))
-    return segments
+    indices.append([pos,start+2])
+    return segments,indices
 
 
 
